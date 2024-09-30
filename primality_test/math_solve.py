@@ -100,27 +100,27 @@ def Pollard_rho(N:int,test_time=20,loop_time=2**16):
             step += 1
     return 1
 
-def FR_factorize(N:int,test_time=10,balance=True):         # 默认尝试次数为10，变量balance表示是否希望F和R尽可能接近
+def FR_factorize(N:int,test_time=10,balance=True):         # if balance is true, we expect F and R are as close as posible
     assert N > 1, 'Factorized integer should be NO LESS THAN 2'
     for _ in range(test_time):
-        F = Pollard_rho(N)            # 先用Pollard's Rho算法初步找到一个因数
-        if F == 1: break              # 如果找到的因数是1，说明可能无法分解或非常难分解，后面的尝试意义不大，直接结束
+        F = Pollard_rho(N)
+        if F == 1: break
         R = N//F
         if F < R: F,R = R,F
         Q = gcd(F,R)
-        while Q > 1:                # 要求F和R互素，如果不互素，就把公因数从F里拿出来乘到R上
+        while Q > 1:
             F //= Q
             R *= Q
             Q = gcd(F,R)
-        if F < R: F,R = R,F        # 排个序，使F>R
-        if R == 1: continue        # 如果得到的结果是 F=N, R=1，则本轮尝试无效，继续尝试
-        if balance:                # 若balance为真，意味着希望F和R尽量接近，这样做是为了尽量减少后续分解F的计算量
-            while R**3 < N:        # 当 R**3 < N 时，认为F与R相差较大
-                F,Q = FR_factorize(F,test_time=test_time,balance=False)    # 继续分解F，这时不需要balance了，否则可能无限递归
-                if Q == 1: break        # 如果F只能分解出F*1，则说明F可能已经无法分解了，不再尝试
-                R *= Q                  # 若F能分解出非平凡因数，则将该因数拿出来乘到R上
-        return (F,R) if F>R else (R,F)    # 由大到小返回F和R
-    return N,1                            # 尝试次数到达上限，仍不能有效分解，则可能无法分解
+        if F < R: F,R = R,F
+        if R == 1: continue
+        if balance:
+            while R**3 < N:
+                F,Q = FR_factorize(F,test_time=test_time,balance=False)
+                if Q == 1: break
+                R *= Q
+        return (F,R) if F>R else (R,F)
+    return N,1
 
 def prob_prime_factorize(N:int,lim=2**50):
     if N <= lim: return trial_div_factorize(N),set()
@@ -148,8 +148,6 @@ def solve_quadratic_congruence(N,m):
         u,v = (u*u+v*v*d) % N, 2*u*v % N
     if y != 0 or (x*x-m) % N > 0: return {'info':'Jacobi(%d,N) == 1 but no solution for x^2 == %d mod N.'%(m,m)}
     return {x,N-x}
-
-
 
 def Cornacchia_4N(N,D):
     xs = solve_quadratic_congruence(N,-D)
@@ -182,7 +180,6 @@ def V2_sequence(n,P1,P2,Q,N):
     if n == 1: return 0,1
     if n == 2: return (-P2-2*Q)%N, P1%N
     inv_P2 = exgcd(P2,N)[1]
-    # 定义递推关系式
     def double(x,y,a): return (x*x - P2*y*y - 2*power_mod(Q,a//2,N)) % N, (2*x + P1*y)*y % N
     def merge(x,y,r,s):
         v1 = (-Q*x-r)*inv_P2 % N
@@ -190,7 +187,6 @@ def V2_sequence(n,P1,P2,Q,N):
     def up(x,y,r,s):
         v0,v1 = merge(x,y,r,s)
         return (-P2*s-Q*v0) % N, (r+P1*s-Q*v1) % N
-    # 计算递推路径 path_0,path_1
     path_0,path_1 = [],[n]
     while n > 2:
         if n % 2 > 0: n -= 1
@@ -200,7 +196,6 @@ def V2_sequence(n,P1,P2,Q,N):
         else: path_0.append((n-2,n))
     path_0.reverse()
     path_1.reverse()
-    # 沿递推路径path_0进行递推
     for a,b in path_0:
         if b == 2: V0a,V1a,V0b,V1b = 2-2*a, a, (-P2-2*Q)%N, P1%N
         elif b - a == 2:
@@ -210,7 +205,6 @@ def V2_sequence(n,P1,P2,Q,N):
         else:
             x,y = up(V0a,V1a,V0b,V1b)
             V0a,V1a,V0b,V1b = V0b,V1b,x,y
-    # 沿递推路径path_1进行递推
     for a in path_1:
         if a == 2: V0,V1 = (-P2-2*Q) % N, P1 % N
         elif a % 2 > 0: V0,V1 = up(V0a,V1a,V0b,V1b)
@@ -222,7 +216,6 @@ def V3_sequence(n,P1,P2,P3,Q,N):
     if n == 1: return 0,1,0
     if n == 2: return (-2*Q)%N, 0, 1
     inv_P3 = exgcd(P3,N)[1]
-    # 定义递推关系式
     def double(x,y,z,a): return (x*x + 2*P3*y*z + P1*P3*z*z - 2*power_mod(Q,a>>1,N)) % N, (2*x*y - 2*P2*y*z + (P3-P1*P2)*z*z) % N, (y*y + 2*x*z + 2*P1*y*z + (P1*P1-P2)*z*z) % N
     def merge(x,y,z,r,s,t):
         v2 = (Q*x+r)*inv_P3 % N
@@ -230,7 +223,6 @@ def V3_sequence(n,P1,P2,P3,Q,N):
     def up(x,y,z,r,s,t):
         v0,v1,v2 = merge(x,y,z,r,s,t)
         return (P3*t-Q*v0) % N, (r-P2*t-Q*v1) % N, (s+P1*t-Q*v2) % N
-    # 计算递推路径 path_0,path_1
     path_0,path_1 = [],[n]
     while n > 2:
         if n % 2 > 0: n -= 1
@@ -240,7 +232,6 @@ def V3_sequence(n,P1,P2,P3,Q,N):
         else: path_0.append((n-2,n))
     path_0.reverse()
     path_1.reverse()
-    # 沿递推路径path_0进行递推
     for a,b in path_0:
         if b == 2: V0a,V1a,V2a,V0b,V1b,V2b = 2-2*a, a, 0, (-2*Q)%N, 0, 1
         elif b - a == 2:
@@ -250,7 +241,6 @@ def V3_sequence(n,P1,P2,P3,Q,N):
         else:
             x,y,z = up(V0a,V1a,V2a,V0b,V1b,V2b)
             V0a,V1a,V2a,V0b,V1b,V2b = V0b,V1b,V2b,x,y,z
-    # 沿递推路径path_0进行递推
     for a in path_1:
         if a == 2: V0,V1,V2 = (-2*Q)%N, 0, 1
         elif a % 2 > 0: V0,V1,V2 = up(V0a,V1a,V2a,V0b,V1b,V2b)
@@ -267,9 +257,7 @@ def primitive_root(q:int):
                 break
         if is_pt: return g
 
-# 计算矩阵行列式，在求多项式判别式时会用到
-# 这里采用最笨的递归法，对于小矩阵来说够用了
-def det(M):
+def det(M):         # determinant of matrix M
     d = len(M)
     if d == 1: return M[0][0]
     D = i = 0
