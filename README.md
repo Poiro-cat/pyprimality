@@ -6,13 +6,13 @@ This package is based on Python 3, and contains prototypes of nearly all known p
 
 ### 0. Trial division
 
-The simplest algorithm which try to divide N with all possible factors.
+The simplest algorithm which tries to divide $N$ with all possible factors.
 
 How to use in pyprime: `Trial_division()`, `Trial_division_30()`, `Trial_division_lim()`
 
 ### 1. Fermat's test
 
-If there exists an integer $a$ which is coprime to $N$ and $a^{N-1}=1\pmod{N}$, then $N$ is probable prime. This is based on Fermat's little theorem.
+If there exists an integer $a$ which is coprime to $N$ and $a^{N-1}\equiv 1\pmod{N}$, then $N$ is probable prime. This is based on Fermat's little theorem.
 
 Reference: [Fermat primality test](https://en.wikipedia.org/wiki/Fermat_primality_test)
 
@@ -72,7 +72,7 @@ How to use in pyprime: `Proth()`, `Pepin()`
 
 ### 9. Factorizing Lucas probable prime test
 
-Strong versions of Lucas probable prime test, with complete of partial factorization of $N+1$.
+Strong versions of Lucas probable prime test, which utilize complete or partial factorization of $N+1$.
 
 Reference: [n+1 tests](https://t5k.org/prove/prove3_2.html)
 
