@@ -96,7 +96,7 @@ def calculate_jpq(p, k, q, f):
     for x in range(1, q-1): j.coef[(x+f[x])%j.num] += 1
     return j
 
-# compute j_2q(*) 和 j_2q(#), when p == 2 and k > 2
+# compute j_2q(*) and j_2q(#), when p == 2 and k > 2
 def calculate_j2q(k, q, j, f):
     j1, j2 = Cyclotomic(2, k), Cyclotomic(2, k)
     for x in range(1, q-1):
