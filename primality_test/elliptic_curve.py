@@ -104,63 +104,63 @@ def complex_multiplication(N,D,RCP,u_odd):
     return a,b
 
 class Elliptic_curve():
-    def __init__(self,N,a,b):         # 初始化曲线参数
+    def __init__(self,N,a,b):
         self.N = N
         self.a = a
         self.b = b
-    def point_on_curve(self,x,y):      # 判断点(x,y)是否在曲线上
+    def point_on_curve(self,x,y):
         return (y*y - x**3 - self.a*x - self.b) % self.N == 0
-    def random_point(self,zero_point=True):          # 从曲线上随机选择一点，zero_point 表示是否可选零点
+    def random_point(self,zero_point=True):          # if zero_point is true, points on x-axis are acceptable
         while True:
             x = random.randint(0,self.N-1)
             y2 = (x**3 + self.a*x + self.b) % self.N
             if y2 == 0:
-                if zero_point: return (x,0)            # 如果随机选到了零点且 zero_point 为 True，就返回该零点
-                continue                               # 如果 zero_point 为 False 就重新选择
+                if zero_point: return (x,0)
+                continue
             jacobi = Jacobi(y2,self.N)
             if jacobi == -1: continue
-            if jacobi == 0: return {'info':'Factor found: %d'%gcd(y2,self.N)}        # 发现了N的非平凡因数，将信息返回给算法主体
+            if jacobi == 0: return {'info':'Factor found: %d'%gcd(y2,self.N)}        # nontrivial factor of N is found
             ys = solve_quadratic_congruence(self.N,y2)
-            if type(ys) == dict: return ys                                # 得到了N是合数的信息，将信息返回给算法主体
+            if type(ys) == dict: return ys                                # information that N is composite
             return (x,list(ys)[random.randint(0,1)])
-    def plus(self,P,Q):          # 点加法运算
-        if P == (0,): return Q    # 无穷远点/单位元的坐标记为tuple：(0,)
+    def plus(self,P,Q):
+        if P == (0,): return Q    # tuple (0,) represents infinity point
         if Q == (0,): return P
-        if P[0] != Q[0]:          # 若P和Q横坐标不相等，则根据斜率进行计算
+        if P[0] != Q[0]:
             c,inv_dx,_ = exgcd(P[0]-Q[0],self.N)
-            if c > 1: return {'info':'Factor found: %d'%c}   # 找到了N的因数，N是合数，返回相关信息
+            if c > 1: return {'info':'Factor found: %d'%c}   # nontrivial factor of N is found
             k = (P[1]-Q[1]) * inv_dx % self.N
             x = (k*k-P[0]-Q[0]) % self.N
             y = (-k*(x-P[0])-P[1]) % self.N
-            if not self.point_on_curve(x,y): return {'info':'Group operation failed: point not on the curve'}  # 若计算出来的点不在曲线上，说明加法法则失效，N是合数，返回相关信息
+            if not self.point_on_curve(x,y): return {'info':'Group operation failed: point not on the curve'}
             return (x,y)
-        if (P[1] + Q[1]) % self.N == 0: return (0,)    # 若横坐标相等，纵坐标为相反数，则结果为无穷远点/单位元
-        if P[1] == Q[1]:                     # 若横纵坐标都相等，即两点重合，则根据“切线”斜率进行计算
+        if (P[1] + Q[1]) % self.N == 0: return (0,)
+        if P[1] == Q[1]:
             c,inv_2y,_ = exgcd(2*P[1],self.N)
-            if c > 1: return {'info':'Factor found: %d'%c}   # 找到了N的因数，N是合数，返回相关信息
+            if c > 1: return {'info':'Factor found: %d'%c}   # nontrivial factor of N is found
             k = ((3*P[0]*P[0]+self.a)*inv_2y) % self.N
             x = (k*k-2*P[0]) % self.N
             y = (-k*(x-P[0])-P[1]) % self.N
-            if not self.point_on_curve(x,y): return {'info':'Group operation failed: point not on the curve'}  # 点不在曲线上，N是合数，返回相关信息
+            if not self.point_on_curve(x,y): return {'info':'Group operation failed: point not on the curve'}
             return (x,y)
-        return {'info':'Not a group: x1==x2 but y1!=y2 and y1+y2!=0'}   # 两点横坐标相等，纵坐标既不相等也不相反，违反椭圆曲线群性质，N是合数，返回相关信息
+        return {'info':'Not a group: x1==x2 but y1!=y2 and y1+y2!=0'}
     def times(self,m,P):     # 数乘运算，即点的倍点
         Q = (0,)
         while True:
             if m % 2 > 0: Q = self.plus(Q,P)
-            if type(Q) == dict: return Q    # 得到了N是合数的信息，返回给算法主体
+            if type(Q) == dict: return Q    # information that N is composite
             m //= 2
             if m == 0: break
             P = self.plus(P,P)
-            if type(P) == dict: return Q    # 同上
+            if type(P) == dict: return Q    # same as above
         return Q
-    def schoof(self):                 # Schoof算法求阶数，很长很麻烦，这里不详细介绍
+    def schoof(self):                 # Schoof's algorithm
         def const(c): return Polynomial(c,self.N)
         primes = prime_list_for_schoof(self.N)
         x = Polynomial(modulo=self.N)
         E = x**3 + self.a*x + self.b
         xN = poly_pow_mod(x,self.N,E)
-        if type(xN) == dict: return xN        # 计算公因式时得到了N是合数的信息，将信息返回给算法主体；以下类似的语句同理
+        if type(xN) == dict: return xN        # information that N is composite
         pcd = gcd_poly(E,xN-x)
         if type(pcd) == dict: return pcd
         t = int(not pcd.degree)
@@ -230,10 +230,10 @@ class Elliptic_curve():
                         tm = tau if pcd.degree>0 else -tau
                         break
                     tau += 1
-                if tau > (m+1)//2: return {'info':'Frobenius endomorphism failed.'}   # 计算过程中得到了不符合椭圆曲线群性质的结果，说明N是合数，返回相关信息
+                if tau > (m+1)//2: return {'info':'Frobenius endomorphism failed.'}   # information that N is composite
             _,inv_M,inv_m = exgcd(M,m)
             t = (tm*M*inv_M+t*m*inv_m) % (m*M)
             M *= m
         if t >= M//2: t -= M
-        if t*t > 4*self.N: return {'info':'Hasse theorem failed.'}      # 计算过程中得到了不符合椭圆曲线群性质的结果，说明N是合数，返回相关信息
+        if t*t > 4*self.N: return {'info':'Hasse theorem failed.'}      # information that N is composite
         return self.N+1-t
