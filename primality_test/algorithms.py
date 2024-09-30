@@ -1331,9 +1331,9 @@ def Quadratic_Frobenius(N,b,c,pr=True):
             if pr: print('PRIME')
             return True
         if N % m == 0: factor = m
-    ## Step 2: 检验完全平方
+    ## Step 2: perfect square test
     if powrt_int(N,2) > 0: factor = powrt_int(N,2)    # perfect square test
-    ## 寻找其他可能的非平凡因数
+    ## possible nontrivial factors
     if 1 < gcd(b*b+4*c,N) < N: factor = gcd(b*b+4*c,N)
     if 1 < gcd(c,N) < N: factor = gcd(c,N)
     if factor > 1:
@@ -1343,7 +1343,7 @@ def Quadratic_Frobenius(N,b,c,pr=True):
     assert Jacobi(b*b+4*c,N) == -Jacobi(-c,N) == -1, 'Condition for Jacobi symbol not satisfied.'
     x = Polynomial(modulo=N)
     f = x*x - b*x - c
-    ## Step 3: 计算 x^{(N+1)/2} mod f(x)
+    ## Step 3: compute x^{(N+1)/2} mod f(x)
     y = poly_pow_mod(x,N//2+1,f)
     if type(y) == dict: info = y['info']      # information received which tells N is composite
     elif y.degree > 0: info = 'Quadratic Frobenius test failed with x^((N+1)/2) not in Z/NZ.'    # Step 3 failed
@@ -1352,7 +1352,7 @@ def Quadratic_Frobenius(N,b,c,pr=True):
         if pr: print(info)
         if pr: print('COMPOSITE')
         return False
-    ## Step 4: 计算 x^(N+1)
+    ## Step 4: compute x^(N+1)
     y = y.coef[0] if y.coef else 0
     if (y*y+c) % N > 0:            # Step 4 failed
         if pr: print('Quadratic Frobenius test failed with x^(N+1) != -c (mod N,f(x)).')
