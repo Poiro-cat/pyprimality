@@ -67,7 +67,7 @@ class Polynomial():
             if n == 0: break
             p *= p
         return res
-    def divmod(self,other):        # 多项式带余除法，返回商式和余式
+    def divmod(self,other):
         assert self.modulo == other.modulo, 'Modulo numbers are different.'
         assert other.coef, 'Modulo polynomial cannot be ZERO.'
         if not self.coef: return self,self
@@ -79,16 +79,16 @@ class Polynomial():
             r = gcd(remainder.coef[n],c[m])
             r1,r2 = remainder.coef[n]//r,c[m]//r
             r,r2,_ = exgcd(r2,self.modulo)
-            if r > 1: return [{'info':'Factor found: %d'%r}]*2           # 计算过程中发现了N的因数，返回该信息，最终将在算法主体中将判定N为合数
+            if r > 1: return [{'info':'Factor found: %d'%r}]*2           # nontrivial factor of N is found
             quotient[n-m] = r1*r2
             remainder -= other*r1*r2 * Polynomial({n-m:1},self.modulo)
             n = remainder.degree
         quotient = Polynomial(quotient,self.modulo)
         quotient.simplify()
         return quotient,remainder
-    def __mod__(self,other):          # 模除法，只保留余式
+    def __mod__(self,other):
         return self.divmod(other)[1]
-    def __floordiv__(self,other):     # 取整除法，只保留商式
+    def __floordiv__(self,other):
         return self.divmod(other)[0]
     def __str__(self):
         if not self.coef: return '0'
@@ -122,7 +122,7 @@ class Polynomial():
         c = g.coef[g.degree]
         c = exgcd(c,self.modulo)[1]
         return g*c
-    def discriminant(self):    # 计算判别式（如果是定义在有限域上的多项式，则对判别式的值也取模）
+    def discriminant(self):
         d = self.degree
         a = [(self.coef[i] if i in self.coef else 0) for i in range(d+1)]
         s = [d]
@@ -133,13 +133,13 @@ class Polynomial():
             s.append(sk)
         M = [s[i:i+d] for i in range(d)]
         return det(M)%self.modulo if self.modulo>0 else det(M)
-    def monic(self):      # 首项系数归一化，并返回新多项式（仅适用于有限域多项式）
+    def monic(self):
         assert self.modulo > 0
-        p = self * exgcd(self.coef[self.degree],self.modulo)[1]    # 将原多项式乘以首项系数在有限域中的倒数，exgcd是扩展欧几里得算法，函数定义见第三篇文章
-        if p.coef[p.degree] > 1: return {'info':'Factor found: %d'%p.coef[p.degree]}    # 若首项系数未归一，说明N是合数，返回相关信息
+        p = self * exgcd(self.coef[self.degree],self.modulo)[1]
+        if p.coef[p.degree] > 1: return {'info':'Factor found: %d'%p.coef[p.degree]}
         return p
 
-def poly_pow_mod(p1:Polynomial,N:int,p2:Polynomial):
+def poly_pow_mod(p1:Polynomial,N:int,p2:Polynomial):                # computing p1(x)^N mod p2(x)
     assert p1.modulo == p2.modulo, 'Modulo numbers are different.'
     assert p2.coef, 'Modulo polynomial cannot be ZERO.'
     res = Polynomial(1,p1.modulo)
@@ -154,16 +154,16 @@ def poly_pow_mod(p1:Polynomial,N:int,p2:Polynomial):
         if type(p1) == dict: return p1
     return res
 
-def gcd_poly(p1,p2):
+def gcd_poly(p1,p2):                                 # computing greatest common divisor of two polynomials
     if not (p1.coef and p2.coef): return p1 + p2
     p1,p2 = p2, p1%p2
-    if type(p2) == dict: return p2         # 同上
+    if type(p2) == dict: return p2
     while p2.coef:
         p1,p2 = p2, p1%p2
-        if type(p2) == dict: return p2     # 同上
+        if type(p2) == dict: return p2
     return p1
 
-def poly_nest(p1,p2):
+def poly_nest(p1,p2):                  # computing p1(p2(x))
     assert p1.modulo == p2.modulo, 'Modulo numbers are different.'
     p3 = Polynomial({},p1.modulo)
     y = Polynomial({0:1},p1.modulo)
