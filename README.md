@@ -134,7 +134,7 @@ How to use in pyprime: `Frobenius_prob_prime()`, `Strong_Frobenius_prob_prime()`
 
 Based on the Fermat's little theorem over polynomial rings, AKS test is the first **deterministic** primality test which is able to determine **in polynomial time**, whether an **arbitrary given number** is prime or composite and this **without relying on mathematical conjectures** (such as generalized Riemann hypothesis that the deterministic version of Miller's test relies on).
 
-It is very efficient in terms of its complexity, theoretically, but is extremely slow in practice.
+It's very efficient according to its complexity, theoretically, but is extremely slow in practice.
 
 Reference: [<AKS, 2004>](https://www.cse.iitk.ac.in/users/manindra/algebra/primality_v6.pdf), [AKS primality test](https://en.wikipedia.org/wiki/AKS_primality_test)
 
