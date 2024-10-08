@@ -144,7 +144,7 @@ class Elliptic_curve():
             if not self.point_on_curve(x,y): return {'info':'Group operation failed: point not on the curve'}
             return (x,y)
         return {'info':'Not a group: x1==x2 but y1!=y2 and y1+y2!=0'}
-    def times(self,m,P):     # 数乘运算，即点的倍点
+    def times(self,m,P):     # an integer m multiples a point P
         Q = (0,)
         while True:
             if m % 2 > 0: Q = self.plus(Q,P)
