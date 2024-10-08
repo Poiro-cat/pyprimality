@@ -114,7 +114,7 @@ These methods are proposed by H. C. Williams et al and are related to cyclotomic
 
 Reference: [\<Williams, 1976, "N^2+1"\>](https://sci-hub.se/10.1090/s0025-5718-1976-0396390-3), [\<Williams, 1976, "N^2±N+1"\>](https://sci-hub.se/10.1090/s0025-5718-1976-0414473-6)
 
-How to use in pyprime: `Quartic_field()`, `Cubic_Sextic_field()`
+How to use in pyprime: `Cubic_field()`, `Quartic_field()`, `Sextic_field()`
 
 ### 15. APR-CL algorithm
 
