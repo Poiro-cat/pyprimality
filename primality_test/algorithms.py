@@ -975,7 +975,7 @@ def Quartic_field(N:int,max_D=120,max_C=120,test_time=100,pr=True):
     if pr: print('COMPOSITE (probable)')
     return False
 
-def Cubic_Sextic_field(N:int,theta:int,max_G=120,test_time=100,pr=True):
+def cubic_sextic_field(N:int,theta:int,max_G,test_time,pr):
     assert N > 1, 'Tested integer should be NO LESS THAN 2'
     assert abs(theta) == 1, 'Parameter theta must be 1 or -1.'
     factor = 1
@@ -1062,6 +1062,12 @@ def Cubic_Sextic_field(N:int,theta:int,max_G=120,test_time=100,pr=True):
     if pr: print('Parameters not found.')
     if pr: print('COMPOSITE (probable)')
     return False
+
+def Cubic_field(N:int,max_G=120,test_time=100,pr=True):
+    return cubic_sextic_field(N,theta=1,max_G=max_G,test_time=test_time,pr=pr)
+
+def Sextic_field(N:int,max_G=120,test_time=100,pr=True):
+    return cubic_sextic_field(N,theta=-1,max_G=max_G,test_time=test_time,pr=pr)
 
 
 ##### 15. APR-CL test #####
@@ -1281,8 +1287,8 @@ def Strong_Frobenius_prob_prime(N:int,f:Polynomial,pr=True):         # An additi
             s //= 2
         y = poly_pow_mod(x,s,Fk)
         if type(y) == Polynomial:
-            yi = gcd_poly(y-1,Fk)               # 计算 Fk0(x)
-            if type(yi) == Polynomial: yi = yi.monic()   # 首项归一化
+            yi = gcd_poly(y-1,Fk)               # compute Fk0(x)
+            if type(yi) == Polynomial: yi = yi.monic()
             Fki = [yi]
             if type(yi) == dict: info = yi['info']
             else: info = 'Sqrt step failed with deg(Fki) mod k != 0' if yi.degree % k > 0 else ''
@@ -1321,26 +1327,7 @@ def Strong_Frobenius_prob_prime(N:int,f:Polynomial,pr=True):         # An additi
     if pr: print('PRIME (probable)')
     return True
 
-def Quadratic_Frobenius(N,b,c,pr=True):
-    assert N > 1, 'Tested integer N should be NO LESS THAN 2'
-    factor = 1
-    ## Step 1: trial division
-    for m in [2,3,5,7,11,13,17,19,23,29]:
-        if m * m > N and factor == 1:
-            if pr: print('Factor not found.')
-            if pr: print('PRIME')
-            return True
-        if N % m == 0: factor = m
-    ## Step 2: perfect square test
-    if powrt_int(N,2) > 0: factor = powrt_int(N,2)    # perfect square test
-    ## possible nontrivial factors
-    if 1 < gcd(b*b+4*c,N) < N: factor = gcd(b*b+4*c,N)
-    if 1 < gcd(c,N) < N: factor = gcd(c,N)
-    if factor > 1:
-        if pr: print('Factor found: %d'%factor)
-        if pr: print('COMPOSITE')
-        return False
-    assert Jacobi(b*b+4*c,N) == -Jacobi(-c,N) == -1, 'Condition for Jacobi symbol not satisfied.'
+def quadratic_frobenius_core(N,b,c,pr):         # core steps of quadratic frobenius test
     x = Polynomial(modulo=N)
     f = x*x - b*x - c
     ## Step 3: compute x^{(N+1)/2} mod f(x)
@@ -1384,9 +1371,32 @@ def Quadratic_Frobenius(N,b,c,pr=True):
     if pr: print('COMPOSITE')
     return False
 
+def Quadratic_Frobenius(N,b,c,pr=True):
+    assert N > 1, 'Tested integer N should be NO LESS THAN 2'
+    factor = 1
+    ## trial division
+    for m in [2,3,5,7,11,13,17,19]:
+        if m * m > N and factor == 1:
+            if pr: print('Factor not found.')
+            if pr: print('PRIME')
+            return True
+        if N % m == 0: factor = m
+    ## perfect square test
+    if powrt_int(N,2) > 0: factor = powrt_int(N,2)
+    ## possible nontrivial factors
+    if 1 < gcd(b*b+4*c,N) < N: factor = gcd(b*b+4*c,N)
+    if 1 < gcd(c,N) < N: factor = gcd(c,N)
+    if factor > 1:
+        if pr: print('Factor found: %d'%factor)
+        if pr: print('COMPOSITE')
+        return False
+    assert Jacobi(b*b+4*c,N) == -Jacobi(-c,N) == -1, 'Condition for Jacobi symbol not satisfied.'
+    # core steps
+    return quadratic_frobenius_core(N,b,c,pr)
+
 def Random_Quadratic_Frobenius(N,pr=True):
     factor = 1
-    for m in [2,3,5,7,11,13,17,19]:            # trial division
+    for m in [2,3,5,7,11,13,17,19]:               # trial division
         if m * m > N and factor == 1:
             if pr: print('Factor not found.')
             if pr: print('PRIME')
@@ -1401,7 +1411,13 @@ def Random_Quadratic_Frobenius(N,pr=True):
         b,c = [random.randint(1,N-1) for _ in range(2)]
         if Jacobi(b*b+4*c,N) == -Jacobi(-c,N) == -1: break
     if pr: print('parameters b,c = %d,%d'%(b,c))
-    return Quadratic_Frobenius(N,1,c,pr=pr)
+    if 1 < gcd(b*b+4*c,N) < N: factor = gcd(b*b+4*c,N)
+    if 1 < gcd(c,N) < N: factor = gcd(c,N)
+    if factor > 1:
+        if pr: print('Factor found: %d'%factor)
+        if pr: print('COMPOSITE')
+        return False
+    return quadratic_frobenius_core(N,b,c,pr)    # core steps
 
 
 ##### 17. AKS #####
