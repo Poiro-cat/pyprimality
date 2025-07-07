@@ -9,8 +9,8 @@ This is a Python 3 package implementing prototypes of nearly all known primality
 The simplest algorithm which checks divisibility by all possible factors.
 
 - `Trial_division(N)` : Trial divisors range from 2 to $\lfloor\sqrt N\rfloor$
-- `Trial_division_30(N)` : After testing divisibility by $2,3,5$, trial devisors are chosen  by $m=30k+i$, where $k\geq0$ and $i$ is coprime with $30$.
-- `Trial_division_lim(N)` : Trial devisors are chosen to from a dynamically generated prime number list.
+- `Trial_division_reduced(N, small_primes)` : Trial divisors are first selected from `small_primes` (a list of the smallest known primes), then generated as $m=A*k+b$, where $k\geq0$, $A$ is the product of all given primes and $b$ is coprime with $A$.
+- `Trial_division_dynamic(N)` : Trial devisors are selected from a dynamically generated prime number list.
 
 ### 1. Fermat's test
 
