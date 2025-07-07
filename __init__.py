@@ -1,7 +1,7 @@
 from .polynomial import Polynomial
 from .elliptic_curve import Point, Elliptic_curve
 from .primality_test import (
-    Trial_division, Trial_division_30, Trial_division_lim,
+    Trial_division, Trial_division_reduced, Trial_division_dynamic,
     Fermat, Miller_Rabin, Solovay_Strassen,
     Lucas_prob_prime, Lucas_prob_prime_random, Strong_Lucas_prob_prime, Strong_Lucas_prob_prime_random,
     Extra_strong_Lucas_prob_prime, Extra_strong_Lucas_prob_prime_random, Baillie_PSW,
