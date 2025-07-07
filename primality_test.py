@@ -27,26 +27,30 @@ def Trial_division(N:int, pr:bool=True):
     if pr: print(HINT_NO_FACTOR)
     return True
 
-def Trial_division_30(N:int, pr:bool=True):
-    assert N > 1, HINT_LARGER_THAN_1
-    factor = 1
-    for m in [2,3,5]:
+def Trial_division_reduced(N:int, small_primes:list[int], pr:bool=True):
+    factor = A = 1
+    for m in small_primes:
+        A *= m
         if m*m > N or factor > 1: break
         if N % m == 0: factor = m
-    A,i,m = 0,1,7
-    B = [1,7,11,13,17,19,23,29]
+    B = [1]
+    for b in range(2,A):
+        if gcd(b,A) == 1: B.append(b)
+    if pr: print('Product of all given primes: A =', A)
+    if pr: print('Other possible factors: m = A*k + b , where b is coprime with A.')
+    k,i,m = (0, 1, B[1]) if len(B) > 1 else (1, 0, B[0])
     while m*m <= N and factor == 1:
         if N % m == 0: factor = m
-        i = (i+1) % 8
-        if i == 0: A += 30
-        m = A + B[i]
+        i = (i+1) % len(B)
+        if i == 0: k += 1
+        m = A*k + B[i]
     if factor > 1:
         if pr: print(HINT_FACTOR, factor)
         return False
     if pr: print(HINT_NO_FACTOR)
     return True
 
-def Trial_division_lim(N:int, pr:bool=True):
+def Trial_division_dynamic(N:int, pr:bool=True):
     assert N > 1, HINT_LARGER_THAN_1
     primes = []
     A,i,m = 2,0,2
@@ -60,6 +64,7 @@ def Trial_division_lim(N:int, pr:bool=True):
         if m_prime:
             primes.append(m)
             if N % m == 0:
+                if pr: print(f'Known prime list: length = {len(primes)}, max = {m}')
                 if pr: print(HINT_FACTOR, m)
                 return False
         m = A*k + B[i]
@@ -76,6 +81,7 @@ def Trial_division_lim(N:int, pr:bool=True):
             A *= q
             r += 1
             B,k,i = new_B, 1, 0
+    if pr: print(f'Known prime list: length = {len(primes)}, max = {m}')
     if pr: print(HINT_NO_FACTOR)
     return True
 
